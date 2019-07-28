@@ -12,15 +12,15 @@ var parseDate = d3.timeParse('%m/%d/%Y'),
 function type(d) {
     return {
       date    : parseDate(d.Date),
-      price   : +d.Adj_Close,
-      volume : +d.Volume,
+      price   : +d.Close,
+      rate : +d.FEDFUNDS,
     }
   }
 
 
 
 async function init() {
-    data = await d3.csv("https://raw.githubusercontent.com/HongfeiLi365/Data-visualization/master/data/GSPC.csv", type);
+    data = await d3.csv("https://raw.githubusercontent.com/HongfeiLi365/Data-visualization/master/data/history.csv", type);
     console.log(data);
 
 
