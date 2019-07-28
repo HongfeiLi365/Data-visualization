@@ -1,0 +1,14 @@
+.chart text {
+    fill: #7f8faf;
+  }
+
+.chart__line {
+    fill: none;
+    stroke-width: 1.2px;
+    clip-path: url("#clip");
+  }
+
+.chart__price--focus {
+    stroke-width: 2px;
+    stroke: #2980b9;
+  }
