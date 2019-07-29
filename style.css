@@ -12,3 +12,23 @@
     stroke-width: 2px;
     stroke: #2980b9;
   }
+
+.chart__rate--focus {
+    stroke-width: 2px;
+    stroke: #f88d00;
+  }
+
+.chart__overlay {
+    opacity: 0;
+    pointer-events: all;
+  }
+
+.chart__tooltip--price {
+    fill: none;
+    stroke: #f00;
+  }
+
+.chart__tooltip--rate {
+    fill: none;
+    stroke: #f00;
+  }
