@@ -32,3 +32,31 @@
     fill: none;
     stroke: #f00;
   }
+
+.chart__area {
+    fill: #e6f6fe;
+    stroke: #3587bc;
+  }
+
+
+  .chart__range-selection text {
+    cursor: pointer;
+    text-decoration: underline;
+    fill: #2980b9;
+  }
+  .chart__axis--context text {
+    fill: #7f8faf;
+  }
+  .chart__axis--context .tick:nth-child(odd) {
+    display: none;
+  }
+  .chart__axis--context path,
+  .chart__axis--context line {
+    display: none;
+  }
+
+  .extent {
+    fill: #e2f0ff;
+    fill: #3587bc;
+    fill-opacity: 0.3;
+  }
