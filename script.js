@@ -24,8 +24,6 @@ async function init() {
     data = await d3.csv("https://raw.githubusercontent.com/HongfeiLi365/Data-visualization/master/data/history.csv", type);
     
     
-    
-
     var xRange = d3.extent(data, d => d.date);
 
     // x scale
@@ -40,17 +38,20 @@ async function init() {
     // price scale
     y_price = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.price)]).nice()
-    .range([height - margin.bottom, margin.top]);
+    .range([height - margin.bottom, margin.top])
+    .interpolate(d3.interpolate);
 
     // rate scale
     y_rate = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.rate)]).nice()
-    .range([height - margin.bottom, margin.top]);
+    .range([height - margin.bottom, margin.top])
+    .interpolate(d3.interpolate);
 
     // brush area scale
     y_brush =  d3.scaleLinear()
     .domain([0, d3.max(data, d => d.price)]).nice()
-    .range([height - margin.bottom, height_brushArea]);
+    .range([height - margin.bottom, height_brushArea])
+    .interpolate(d3.interpolate);
 
     x.domain(xRange);
 
@@ -110,7 +111,19 @@ async function init() {
     .attr('class', 'context')
     .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
 
+    var legend = svg.append('g')
+    .attr('class', 'chart__legend')
+    .attr('width', width)
+    .attr('height', 30)
+    .attr('transform', 'translate(' + margin2.left + ', 30)');
 
+    
+    var range = legend.append('text')
+      .text(legendFormat(new Date(xRange[0])) + ' - ' + legendFormat(new Date(xRange[1])))
+      .style('text-anchor', 'end')
+      .attr('transform', 'translate(' + width + ', 0)');
+
+      
      // draw x axis
     focus.append("g")
     .attr("class", "x axis")
@@ -141,7 +154,7 @@ async function init() {
     var helper = focus.append('g')
       .attr('class', 'chart__helper')
       .style('text-anchor', 'end')
-      .attr('transform', 'translate(' + width + ', 0)');
+      .attr('transform', 'translate(' + width + ', 20)');
 
     var helperText = helper.append('text')
 
@@ -161,8 +174,8 @@ async function init() {
     .attr('class', 'chart__mouse')
     .append('rect')
     .attr('class', 'chart__overlay')
-    .attr('width', width)
-    .attr('height', height)
+    .attr('width', width - margin.right)
+    .attr('height', height - margin.bottom)
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
     .on('mouseover', function() {
       helper.style('display', null);
@@ -180,7 +193,6 @@ async function init() {
     function mousemove() {
       var x0 = x.invert(d3.mouse(this)[0]);
       var i = bisectDate(data, x0, 1);
-      console.log("i:"+i);
       var d0 = data[i - 1];
       var d1 = data[i];
       var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
@@ -202,12 +214,6 @@ async function init() {
     .call(xAxis_brushArea);
 
 
-    var legend = svg.append('g')
-    .attr('class', 'chart__legend')
-    .attr('width', width)
-    .attr('height', 30)
-    .attr('transform', 'translate(' + margin2.left + ', 30)');
-
     legend.append('text')
     .attr('class', 'chart__symbol')
     .text('S&P 500');
@@ -228,16 +234,17 @@ async function init() {
 
     function brushed() {
       var ext = brush.extent();
-      if (!brush.empty()) {
-        x.domain(brush.empty() ? x_brushArea.domain() : brush.extent());
+      if (d3.event.selection !== null) {
+        console.log("inside if");
+        x.domain(d3.event.selection === null ? x_brushArea.domain() : brush.extent());
         y_price.domain([
-          d3.min(data.map(function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.price : max; })),
-          d3.max(data.map(function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.price : min; }))
+          d3.min(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.price : max; }),
+          d3.max(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.price : min; })
         ]);
 
         y_rate.domain([
-          d3.min(data.map(function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.rate : max; })),
-          d3.max(data.map(function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.rate : min; }))
+          d3.min(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.rate : max; }),
+          d3.max(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.rate : min; })
         ]);
         range.text(legendFormat(new Date(ext[0])) + ' - ' + legendFormat(new Date(ext[1])))
         //focusGraph.attr('x', function(d, i) { return x(d.date); });
@@ -253,43 +260,46 @@ async function init() {
       focus.select('.y.axisRight').call(yAxisRight);
     }
 
-    // var dateRange = ['1w', '1m', '3m', '6m', '1y', '5y']
-    // for (var i = 0, l = dateRange.length; i < l; i ++) {
-    //   var v = dateRange[i];
-    //   rangeSelection
-    //     .append('text')
-    //     .attr('class', 'chart__range-selection')
-    //     .text(v)
-    //     .attr('transform', 'translate(' + (18 * i) + ', 0)')
-    //     .on('click', function(d) { focusOnRange(this.textContent); });
-    // }
+    var dateRange = ['1w', '1m', '3m', '6m', '1y', '5y']
+    for (var i = 0, l = dateRange.length; i < l; i ++) {
+      var v = dateRange[i];
+      rangeSelection
+        .append('text')
+        .attr('class', 'chart__range-selection')
+        .text(v)
+        .attr('transform', 'translate(' + (18 * i) + ', 0)')
+        .on('click', function(d) { focusOnRange(this.textContent); });
+    }
 
-    // function focusOnRange(range) {
-    //   var today = new Date(data[data.length - 1].date)
-    //   var ext = new Date(data[data.length - 1].date)
+    function focusOnRange(range) {
+      var today = new Date(data[data.length - 1].date);
+      var ext = new Date(data[data.length - 1].date);
 
-    //   if (range === '1m')
-    //     ext.setMonth(ext.getMonth() - 1)
+      var startDate = new Date('2008-01-02');
+      var endDate = new Date('2009-01-07');
+      if (range === '1m')
+        ext.setMonth(ext.getMonth() - 1);
 
-    //   if (range === '1w')
-    //     ext.setDate(ext.getDate() - 7)
+      if (range === '1w')
+        ext.setDate(ext.getDate() - 7);
 
-    //   if (range === '3m')
-    //     ext.setMonth(ext.getMonth() - 3)
+      if (range === '3m')
+        ext.setMonth(ext.getMonth() - 3);
 
-    //   if (range === '6m')
-    //     ext.setMonth(ext.getMonth() - 6)
+      if (range === '6m')
+        ext.setMonth(ext.getMonth() - 6);
 
-    //   if (range === '1y')
-    //     ext.setFullYear(ext.getFullYear() - 1)
+      if (range === '1y')
+        ext.setFullYear(ext.getFullYear() - 1);
 
-    //   if (range === '5y')
-    //     ext.setFullYear(ext.getFullYear() - 5)
+      if (range === '5y')
+        //ext.setFullYear(ext.getFullYear() - 5);
+        brush.extent([startDate, endDate]);
 
-    //   brush.extent([ext, today])
-    //   brushed()
-    //   context.select('g.x.brush').call(brush.extent([ext, today]))
-    // }
+      //brush.extent([ext, today]);
+      brushed();
+      console.log("brush called");
+    }
   
 }
 
