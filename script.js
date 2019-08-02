@@ -1,12 +1,12 @@
 
 var margin = {top: 30, right: 20, bottom: 100, left: 50},
     margin2 = {top: 140, right: 20, bottom: 20, left: 50},
-    width = 800,
+    width = 700,
     height = 400,
     height_brushArea=200;
 
 
-var parseDate = d3.timeParse('%Y-%m-%d'),
+var parseDate = d3.timeParse('%m/%d/%Y'),
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
     legendFormat = d3.timeFormat('%b %d, %Y');
 
@@ -28,7 +28,7 @@ async function init() {
 
     // x scale
     x = d3.scaleUtc()
-    //.domain(d3.extent(data, d => d.date))
+    .domain(d3.extent(data, d => d.date))
     .range([margin.left, width - margin.right]);
 
     x_brushArea = d3.scaleUtc()
@@ -52,8 +52,6 @@ async function init() {
     .domain([0, d3.max(data, d => d.price)]).nice()
     .range([height - margin.bottom, height_brushArea])
     .interpolate(d3.interpolate);
-
-    x.domain(xRange);
 
 
     // function to draw x axis
@@ -83,10 +81,12 @@ async function init() {
 
     // define price line
     var priceLine = d3.line()
+    //.defined(d => !isNaN(d.value))
     .x(d => x(d.date))
     .y(d => y_price(d.price));
 
     var rateLine = d3.line()
+    //.defined(d => !isNaN(d.value))
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y_rate(d.rate); });
 
@@ -102,6 +102,13 @@ async function init() {
     .attr('class', 'chart')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom + 60);
+
+    svg.append('defs').append('clipPath')
+    .attr('id', 'clip')
+  .append('rect')
+    .attr('x', margin.left)
+    .attr('width', width - margin.right - margin.left)
+    .attr('height', height);
 
     var focus = svg.append('g')
     .attr('class', 'focus')
@@ -173,8 +180,9 @@ async function init() {
   var mouseArea = svg.append('g')
     .attr('class', 'chart__mouse')
     .append('rect')
+    .attr('x', margin.left)
     .attr('class', 'chart__overlay')
-    .attr('width', width - margin.right)
+    .attr('width', width - margin.right - margin.left)
     .attr('height', height - margin.bottom)
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
     .on('mouseover', function() {
@@ -223,82 +231,60 @@ async function init() {
     .attr('class', 'chart__range-selection')
     .attr('transform', 'translate(110, 0)');
 
-
-    var brush = d3.brushX(x_brushArea)
-    .on('brush', brushed);
-
     
-    var min = d3.min(data, d => d.price);
-    var max = d3.max(data, d => d.price);
 
 
-    function brushed() {
-      var ext = brush.extent();
-      if (d3.event.selection !== null) {
-        console.log("inside if");
-        x.domain(d3.event.selection === null ? x_brushArea.domain() : brush.extent());
-        y_price.domain([
-          d3.min(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.price : max; }),
-          d3.max(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.price : min; })
-        ]);
+  
 
-        y_rate.domain([
-          d3.min(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.rate : max; }),
-          d3.max(data, function(d) { return (d.date >= ext[0] && d.date <= ext[1]) ? d.rate : min; })
-        ]);
-        range.text(legendFormat(new Date(ext[0])) + ' - ' + legendFormat(new Date(ext[1])))
-        //focusGraph.attr('x', function(d, i) { return x(d.date); });
 
-        var days = Math.ceil((ext[1] - ext[0]) / (24 * 3600 * 1000))
-        //focusGraph.attr('width', (40 > days) ? (40 - days) * 5 / 6 : 5)
-      }
+    function changeRange(startDate, endDate){
+
+      x.domain([startDate, endDate]);
+      y_price.domain([
+        d3.min(data, function(d) { return (d.date >= startDate && d.date <= endDate) ? d.price : 3015; }),
+        d3.max(data, function(d) { return (d.date >= startDate && d.date <= endDate) ? d.price : 0; })
+      ]);
+
+      y_rate.domain([
+        d3.min(data, function(d) { return (d.date >=startDate && d.date <= endDate) ? d.rate : 6.0; }),
+        d3.max(data, function(d) { return (d.date >= startDate && d.date <= endDate) ? d.rate : 0; })
+      ]);
+      range.text(legendFormat(new Date(startDate)) + ' - ' + legendFormat(new Date(endDate)));
+    
 
       priceChart.attr('d', priceLine);
       rateChart.attr('d', rateLine);
       focus.select('.x.axis').call(xAxis);
+
       focus.select('.y.axisLeft').call(yAxisLeft);
       focus.select('.y.axisRight').call(yAxisRight);
+
     }
 
-    var dateRange = ['1w', '1m', '3m', '6m', '1y', '5y']
+    var dateRange = ['2002', '2008', '2018']
     for (var i = 0, l = dateRange.length; i < l; i ++) {
       var v = dateRange[i];
       rangeSelection
         .append('text')
         .attr('class', 'chart__range-selection')
         .text(v)
-        .attr('transform', 'translate(' + (18 * i) + ', 0)')
+        .attr('transform', 'translate(' + (40 * i) + ', 0)')
         .on('click', function(d) { focusOnRange(this.textContent); });
     }
 
     function focusOnRange(range) {
-      var today = new Date(data[data.length - 1].date);
-      var ext = new Date(data[data.length - 1].date);
 
-      var startDate = new Date('2008-01-02');
-      var endDate = new Date('2009-01-07');
-      if (range === '1m')
-        ext.setMonth(ext.getMonth() - 1);
+      if (range === '2002'){
+        changeRange(new Date('2002-01-02'), new Date('2002-12-31'));
+      }
 
-      if (range === '1w')
-        ext.setDate(ext.getDate() - 7);
+      if (range === '2008'){
+        changeRange(new Date('2007-12-31'), new Date('2009-01-07'));
+      }
 
-      if (range === '3m')
-        ext.setMonth(ext.getMonth() - 3);
-
-      if (range === '6m')
-        ext.setMonth(ext.getMonth() - 6);
-
-      if (range === '1y')
-        ext.setFullYear(ext.getFullYear() - 1);
-
-      if (range === '5y')
-        //ext.setFullYear(ext.getFullYear() - 5);
-        brush.extent([startDate, endDate]);
-
-      //brush.extent([ext, today]);
-      brushed();
-      console.log("brush called");
+      if (range === '2018'){
+        changeRange(new Date('2017-01-02'), new Date('2018-12-07'));
+      }
     }
   
 }
