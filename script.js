@@ -117,7 +117,33 @@ async function init() {
 
     var context = svg.append('g')
     .attr('class', 'context')
-    .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
+    .attr('transform', 'translate(' + (margin.left + 50) + ',' + (height - margin.bottom) + ')');
+
+    context.append('g')
+    .attr('class', 'legend-price')
+    .append('circle')
+    .attr('r',5)
+
+    context.append('g')
+    .attr('class','legend-text')
+    .attr('transform', 'translate(10,4)')
+    .append('text')
+    .text('Stock Market Index')
+
+    
+    context.append('g')
+    .attr('class', 'legend-rate')
+    .attr('transform', 'translate(0,15)')
+    .append('circle')
+    .attr('r',5)
+    
+
+    context.append('g')
+    .attr('class','legend-text')
+    .attr('transform', 'translate(10,18)')
+    .append('text')
+    .text('Interest Rate')
+
 
     var legend = svg.append('g')
     .attr('class', 'chart__legend')
@@ -232,7 +258,7 @@ async function init() {
     var rangeSelection =  legend
     .append('g')
     .attr('class', 'chart__range-selection')
-    .attr('transform', 'translate(110, 0)');
+    .attr('transform', 'translate(200, 0)');
 
   
 
@@ -281,7 +307,7 @@ async function init() {
         .append('text')
         .attr('class', 'chart__range-selection')
         .text(v)
-        .attr('transform', 'translate(' + (60 + (40 * i)) + ', 0)')
+        .attr('transform', 'translate(' + (50 * i) + ', 0)')
         .on('click', function(d) { focusOnRange(this.textContent); });
     }
 

@@ -81,3 +81,14 @@ div {
   fill: #000000;
 }
 
+.legend-text{
+  font-size: 11px;
+}
+
+.legend-price {
+  fill: #2980b9;
+}
+
+.legend-rate {
+  fill: #f88d00;
+}
