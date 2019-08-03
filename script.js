@@ -8,7 +8,8 @@ var margin = {top: 30, right: 20, bottom: 100, left: 50},
 
 var parseDate = d3.timeParse('%m/%d/%Y'),
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
-    legendFormat = d3.timeFormat('%b %d, %Y');
+    legendFormat = d3.timeFormat('%b %d, %Y'),
+    priceFormat = d3.format(".1f");
 
 function type(d) {
     return {
@@ -31,9 +32,9 @@ async function init() {
     .domain(d3.extent(data, d => d.date))
     .range([margin.left, width - margin.right]);
 
-    x_brushArea = d3.scaleUtc()
-    .domain(d3.extent(data, d => d.date))
-    .range([margin.left, width - margin.right]);
+    // x_brushArea = d3.scaleUtc()
+    // .domain(d3.extent(data, d => d.date))
+    // .range([margin.left, width - margin.right]);
 
     // price scale
     y_price = d3.scaleLinear()
@@ -47,21 +48,21 @@ async function init() {
     .range([height - margin.bottom, margin.top])
     .interpolate(d3.interpolate);
 
-    // brush area scale
-    y_brush =  d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.price)]).nice()
-    .range([height - margin.bottom, height_brushArea])
-    .interpolate(d3.interpolate);
+    // // brush area scale
+    // y_brush =  d3.scaleLinear()
+    // .domain([0, d3.max(data, d => d.price)]).nice()
+    // .range([height - margin.bottom, height_brushArea])
+    // .interpolate(d3.interpolate);
 
 
     // function to draw x axis
     xAxis = g => g
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
+    .call(d3.axisBottom(x));
 
-    xAxis_brushArea = g => g
-    .attr("transform", `translate(0,${height_brushArea+100})`)
-    .call(d3.axisBottom(x_brushArea).ticks(width / 80).tickSizeOuter(0));
+    // xAxis_brushArea = g => g
+    // .attr("transform", `translate(0,${height_brushArea+100})`)
+    // .call(d3.axisBottom(x_brushArea).ticks(width / 80).tickSizeOuter(0));
 
     // function to draw y axis
     yAxisLeft = g => g
@@ -91,10 +92,10 @@ async function init() {
     .y(function(d) { return y_rate(d.rate); });
 
 
-    var brushArea = d3.area()
-    .x(function(d) { return x_brushArea(d.date); })
-    .y0(height_brushArea+100)
-    .y1(function(d) { return y_brush(d.price); });
+    // var brushArea = d3.area()
+    // .x(function(d) { return x_brushArea(d.date); })
+    // .y0(height_brushArea+100)
+    // .y1(function(d) { return y_brush(d.price); });
 
 
 
@@ -164,6 +165,7 @@ async function init() {
       .attr('transform', 'translate(' + width + ', 20)');
 
     var helperText = helper.append('text')
+    .text('Mouse over plot to see details!');
 
     var priceTooltip = focus.append('g')
     .attr('class', 'chart__tooltip--price')
@@ -191,7 +193,8 @@ async function init() {
       rateTooltip.style('display', null);
     })
     .on('mouseout', function() {
-      helper.style('display', 'none');
+      //helper.style('display', 'none');
+      helperText.text('Mouse over plot to see details!');
       priceTooltip.style('display', 'none');
       rateTooltip.style('display', 'none');
     })
@@ -204,53 +207,50 @@ async function init() {
       var d0 = data[i - 1];
       var d1 = data[i];
       var d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-      helperText.text(legendFormat(new Date(d.date)) + ' - S&P 500: ' + d.price + ' Interest Rate: ' + d.rate);
+      helperText.text(legendFormat(new Date(d.date)) + ' - S&P 500: ' + priceFormat(d.price) + ' Interest Rate: ' + d.rate);
       priceTooltip.attr('transform', 'translate(' + x(d.date) + ',' + y_price(d.price) + ')');
       rateTooltip.attr('transform', 'translate(' + x(d.date) + ',' + y_rate(d.rate) + ')');
     }
 
-    context.append('path')
-    .datum(data)
-    .attr('class', 'chart__area area')
-    .attr('d', brushArea);
+    // context.append('path')
+    // .datum(data)
+    // .attr('class', 'chart__area area')
+    // .attr('d', brushArea);
 
 
-    context.append('g')
-    .attr('class', 'x axis chart__axis--context')
-    .attr('y', 0)
-    .attr('transform', 'translate(0,' + (height_brushArea - 22) + ')')
-    .call(xAxis_brushArea);
+    // context.append('g')
+    // .attr('class', 'x axis chart__axis--context')
+    // .attr('y', 0)
+    // .attr('transform', 'translate(0,' + (height_brushArea - 22) + ')')
+    // .call(xAxis_brushArea);
 
 
     legend.append('text')
     .attr('class', 'chart__symbol')
-    .text('S&P 500');
+    .text('Select Recession Periods:');
 
     var rangeSelection =  legend
     .append('g')
     .attr('class', 'chart__range-selection')
     .attr('transform', 'translate(110, 0)');
 
-    
-
-
   
 
 
-    function changeRange(startDate, endDate){
+    function changeRange(startDate, endDate, annotations){
 
-      x.domain([startDate, endDate]);
+      x.domain([startDate, endDate]).nice();
       y_price.domain([
         d3.min(data, function(d) { return (d.date >= startDate && d.date <= endDate) ? d.price : 3015; }),
         d3.max(data, function(d) { return (d.date >= startDate && d.date <= endDate) ? d.price : 0; })
-      ]);
+      ]).nice();
 
       y_rate.domain([
         d3.min(data, function(d) { return (d.date >=startDate && d.date <= endDate) ? d.rate : 6.0; }),
         d3.max(data, function(d) { return (d.date >= startDate && d.date <= endDate) ? d.rate : 0; })
-      ]);
+      ]).nice();
       range.text(legendFormat(new Date(startDate)) + ' - ' + legendFormat(new Date(endDate)));
-    
+      
 
       priceChart.attr('d', priceLine);
       rateChart.attr('d', rateLine);
@@ -259,35 +259,111 @@ async function init() {
       focus.select('.y.axisLeft').call(yAxisLeft);
       focus.select('.y.axisRight').call(yAxisRight);
 
+      d3.select('#annotation').remove();
+
+      // x: x(data[d3.scan(data, function(a,b){return a.price - b.price;})].date),
+      // y: y_price(d3.min(data, d=>d.price))
+
+      var makeAnnotations = d3.annotation()
+      .annotations(annotations)
+
+      theAnnotation = focus.append("g")
+        .attr("id", "annotation")
+        .call(makeAnnotations)
+
+     
     }
 
-    var dateRange = ['2002', '2008', '2018']
+    var dateRange = ['1990', '2002', '2008']
     for (var i = 0, l = dateRange.length; i < l; i ++) {
       var v = dateRange[i];
       rangeSelection
         .append('text')
         .attr('class', 'chart__range-selection')
         .text(v)
-        .attr('transform', 'translate(' + (40 * i) + ', 0)')
+        .attr('transform', 'translate(' + (80 + (40 * i)) + ', 0)')
         .on('click', function(d) { focusOnRange(this.textContent); });
     }
 
     function focusOnRange(range) {
+      if (range === '1990'){
+        const annotations = [
+          {
+            note: {
+              label: "Stock Market Lowest Point",
+              title: "Oct 11, 1990"
+            },
+            connector: {
+              end: "arrow",        // none, or arrow or dot
+              type: "line",       // Line or curve
+              endScale: 1,           // Number of break in the curve
+              lineType : "horizontal"
+            },
+            color: ["Black"],
+            x: 295,
+            y: 270,
+            dy: -80,
+            dx: 0
+          }
+        ]
+
+        changeRange(new Date('1990-01-02'), new Date('1991-12-31'), annotations);
+      }
+
 
       if (range === '2002'){
-        changeRange(new Date('2002-01-02'), new Date('2002-12-31'));
+        const annotations = [
+          {
+            note: {
+              label: "Stock Market Lowest Point",
+              title: "Oct 07, 2002"
+            },
+            connector: {
+              end: "arrow",        // none, or arrow or dot
+              type: "line",       // Line or curve
+              endScale: 1,           // Number of break in the curve
+              lineType : "horizontal"
+            },
+            color: ["Black"],
+            x: 290,
+            y: 250,
+            dy: -100,
+            dx: 0
+          }
+        ]
+
+        changeRange(new Date('2002-01-02'), new Date('2003-12-31'), annotations);
       }
 
       if (range === '2008'){
-        changeRange(new Date('2007-12-31'), new Date('2009-01-07'));
+        const annotations = [
+          {
+            note: {
+              label: "Stock Market Lowest Point",
+              title: "May 06, 2009"
+            },
+            connector: {
+              end: "arrow",        // none, or arrow or dot
+              type: "line",       // Line or curve
+              endScale: 1,           // Number of break in the curve
+              lineType : "horizontal"
+            },
+            color: ["Black"],
+            x: 420,
+            y: 250,
+            dy: -100,
+            dx: 0
+          }
+        ]
+
+        changeRange(new Date('2008-01-02'), new Date('2009-12-31'), annotations);
       }
 
-      if (range === '2018'){
-        changeRange(new Date('2017-01-02'), new Date('2018-12-07'));
-      }
+
     }
-  
+
+    focusOnRange('1990');
 }
 
-
 init();
+
