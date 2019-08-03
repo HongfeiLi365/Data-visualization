@@ -1,62 +1,83 @@
+h1 {
+  font-family: Arial, Helvetica, sans-serif;
+  margin-left: 30px;
+}
+
+p{
+  font-family: Arial, Helvetica, sans-serif;
+  margin-left: 31px;
+  
+}
+
+div {
+  margin:auto;
+}
+
 .chart text {
-    fill: #7f8faf;
-  }
+  fill: #4e596d;
+}
 
 .chart__line {
-    fill: none;
-    stroke-width: 1.2px;
-    clip-path: url("#clip");
-  }
+  fill: none;
+  stroke-width: 1.2px;
+  clip-path: url("#clip");
+}
 
 .chart__price--focus {
-    stroke-width: 2px;
-    stroke: #2980b9;
-  }
+  stroke-width: 2px;
+  stroke: #2980b9;
+}
 
 .chart__rate--focus {
-    stroke-width: 2px;
-    stroke: #f88d00;
-  }
+  stroke-width: 2px;
+  stroke: #f88d00;
+}
 
 .chart__overlay {
-    opacity: 0;
-    pointer-events: all;
-  }
+  opacity: 0;
+  pointer-events: all;
+}
 
 .chart__tooltip--price {
-    fill: none;
-    stroke: #f00;
-  }
+  fill: none;
+  stroke: #f00;
+}
 
 .chart__tooltip--rate {
-    fill: none;
-    stroke: #f00;
-  }
+  fill: none;
+  stroke: #f00;
+}
 
 .chart__area {
-    fill: #e6f6fe;
-    stroke: #3587bc;
-  }
+  fill: #e6f6fe;
+  stroke: #3587bc;
+}
 
 
-  .chart__range-selection text {
-    cursor: pointer;
-    text-decoration: underline;
-    fill: #2980b9;
-  }
-  .chart__axis--context text {
-    fill: #7f8faf;
-  }
-  .chart__axis--context .tick:nth-child(odd) {
-    display: none;
-  }
-  .chart__axis--context path,
-  .chart__axis--context line {
-    display: none;
-  }
+.chart__range-selection text {
+  cursor: pointer;
+  text-decoration: underline;
+  fill: #2980b9;
+}
+.chart__axis--context text {
+  fill: #7f8faf;
+}
+.chart__axis--context .tick:nth-child(odd) {
+  display: none;
+}
+.chart__axis--context path,
+.chart__axis--context line {
+  display: none;
+}
 
-  .extent {
-    fill: #e2f0ff;
-    fill: #3587bc;
-    fill-opacity: 0.3;
-  }
+.extent {
+  fill: #e2f0ff;
+  fill: #3587bc;
+  fill-opacity: 0.3;
+}
+
+#annotation {
+  font-size: 0.8em;
+  fill: #000000;
+}
+

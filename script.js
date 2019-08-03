@@ -1,6 +1,6 @@
 
-var margin = {top: 30, right: 20, bottom: 100, left: 50},
-    margin2 = {top: 140, right: 20, bottom: 20, left: 50},
+var margin = {top: 30, right: 20, bottom: 100, left: 30},
+    margin2 = {top: 140, right: 20, bottom: 20, left: 30},
     width = 700,
     height = 400,
     height_brushArea=200;
@@ -281,7 +281,7 @@ async function init() {
         .append('text')
         .attr('class', 'chart__range-selection')
         .text(v)
-        .attr('transform', 'translate(' + (80 + (40 * i)) + ', 0)')
+        .attr('transform', 'translate(' + (60 + (40 * i)) + ', 0)')
         .on('click', function(d) { focusOnRange(this.textContent); });
     }
 
@@ -291,7 +291,8 @@ async function init() {
           {
             note: {
               label: "Stock Market Lowest Point",
-              title: "Oct 11, 1990"
+              title: "Oct 11, 1990",
+              align: "middle"
             },
             connector: {
               end: "arrow",        // none, or arrow or dot
@@ -300,10 +301,29 @@ async function init() {
               lineType : "horizontal"
             },
             color: ["Black"],
-            x: 295,
+            x: 285,
             y: 270,
-            dy: -80,
+            dy: -100,
             dx: 0
+          },
+
+          {
+            note: {
+              label: "Fed started cutting rate significantly",
+              title: "Nov, 1990"
+              
+            },
+            connector: {
+              end: "arrow",        // none, or arrow or dot
+              type: "line",       // Line or curve
+              endScale: 1,           // Number of break in the curve
+              lineType : "horizontal"
+            },
+            color: ["Black"],
+            x: 305,
+            y: 55,
+            dy: 0,
+            dx: 40
           }
         ]
 
@@ -316,7 +336,9 @@ async function init() {
           {
             note: {
               label: "Stock Market Lowest Point",
-              title: "Oct 07, 2002"
+              title: "Oct 07, 2002",
+              align: "middle"
+          
             },
             connector: {
               end: "arrow",        // none, or arrow or dot
@@ -325,12 +347,31 @@ async function init() {
               lineType : "horizontal"
             },
             color: ["Black"],
-            x: 290,
+            x: 278,
             y: 250,
             dy: -100,
             dx: 0
+          },
+          {
+            note: {
+              label: "Fed started cutting rate significantly",
+              title: "Nov, 2002"
+              
+            },
+            connector: {
+              end: "arrow",        // none, or arrow or dot
+              type: "line",       // Line or curve
+              endScale: 1,           // Number of break in the curve
+              lineType : "horizontal"
+            },
+            color: ["Black"],
+            x: 308,
+            y: 45,
+            dy: 0,
+            dx: 40
           }
         ]
+
 
         changeRange(new Date('2002-01-02'), new Date('2003-12-31'), annotations);
       }
@@ -340,7 +381,8 @@ async function init() {
           {
             note: {
               label: "Stock Market Lowest Point",
-              title: "May 06, 2009"
+              title: "May 06, 2009",
+              align: "middle"
             },
             connector: {
               end: "arrow",        // none, or arrow or dot
@@ -349,10 +391,28 @@ async function init() {
               lineType : "horizontal"
             },
             color: ["Black"],
-            x: 420,
+            x: 412,
             y: 250,
             dy: -100,
             dx: 0
+          },
+          {
+            note: {
+              label: "Fed started cutting rate significantly",
+              title: "Oct, 2008"
+              
+            },
+            connector: {
+              end: "arrow",        // none, or arrow or dot
+              type: "line",       // Line or curve
+              endScale: 1,           // Number of break in the curve
+              lineType : "horizontal"
+            },
+            color: ["Black"],
+            x: 270,
+            y: 182,
+            dy: 0,
+            dx: -30
           }
         ]
 
